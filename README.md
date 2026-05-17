@@ -1,108 +1,69 @@
 # usefull-skills
 
-A collection of Claude Code custom slash commands that act as specialized senior-level engineering assistants. Each command is a focused prompt that assumes a well-defined technical role, covers edge cases, and guides you through a structured workflow.
+A collection of Claude Code custom slash commands that embed senior-level engineering roles directly into your workflow. Each command is a self-contained prompt that assumes a well-defined technical persona, runs a structured multi-phase process, and guides you to a concrete, actionable output.
 
 ## Commands
 
-### `/sprint-planner` — Sprint Planner & Functional Analyst
-
-Translates business requirements into technical development plans.
-
-**What it does:**
-- Detects ambiguities and asks clarifying questions before planning
-- Categorizes each requirement by type (`FEATURE`, `TECH DEBT`, `INFRA`, `SECURITY`, etc.) and priority (`P0`–`P3`)
-- Converts functional requirements into technical user stories with acceptance criteria
-- Produces a prioritized sprint backlog with story point estimates (Fibonacci) and dependency ordering
-- Lists assumptions, risks, and explicit out-of-scope items to prevent scope creep
-
-**Usage:**
-```
-/sprint-planner <functional requirements>
-```
-
----
-
-### `/node-security` — Node.js Security Auditor
-
-Performs a full security audit of Node.js/npm projects.
-
-**What it does:**
-- Analyzes `package.json`, lock files, `.npmrc`, `.env`, Dockerfiles, and CI pipelines
-- Detects unsafe version ranges (`^`, `~`, `*`, `latest`, `git+https://`) and classifies them by risk level
-- Identifies vulnerable, deprecated, or unmaintained packages and suggests secure alternatives
-- Audits lifecycle scripts (`postinstall`, `prepare`) for arbitrary code execution risk
-- Checks for hardcoded secrets, missing `engines.node`, and missing `ignore-scripts` in CI
-- Generates a prioritized report (`CRITICO` / `ALTO` / `MEDIO` / `BAJO`) with exact safe versions
-- Asks if you want Claude to execute the remediation plan automatically (with backup of `package.json`)
-
-**Usage:**
-```
-/node-security               # audits the current project
-/node-security <path>        # audits a specific project path
-```
-
----
-
-### `/unit-test` — Unit Test Engineer
-
-Creates and updates unit test suites following senior-level testing practices.
-
-**What it does:**
-- Detects the test framework automatically (`jest`, `vitest`, `mocha`, etc.) from `package.json`
-- Analyzes the source module: exports, external dependencies to mock, side effects, internal state
-- Presents a full test plan (happy paths, edge cases, error handling, side effect verification) before writing code
-- Mocks 100% of `node_modules` dependencies — no real external calls in unit tests
-- Follows `Arrange / Act / Assert` structure with descriptive test names
-- Detects redundant tests and suggests `it.each()` consolidation when a function has 20+ test cases
-- In update mode: compares source vs existing suite, flags outdated mocks, and reports potential bugs in source code **before** modifying anything
-
-**Usage:**
-```
-/unit-test <path/to/source-file>          # create a new suite
-/unit-test update <path/to/test-file>     # update an existing suite
-```
-
----
+| Command | Role | What it produces |
+|---------|------|-----------------|
+| [`/sprint-planner`](./sprint-planner/) | Sprint Planner & Functional Analyst | Prioritized technical backlog from business requirements |
+| [`/node-security`](./node-security/) | Security Engineer — Node.js/npm | Vulnerability report with safe versions and optional auto-remediation |
+| [`/unit-test`](./unit-test/) | Software Engineer — Testing | Full unit test suite with mocks, happy paths, and edge cases |
 
 ## Installation
 
-These commands are Claude Code global slash commands. To install them:
+Copy the command files you want into your global Claude Code commands directory:
 
-**Option A — Copy manually:**
 ```bash
-# macOS / Linux
-cp commands/*.md ~/.claude/commands/
+# macOS / Linux — install all
+cp sprint-planner/sprint-planner.md ~/.claude/commands/
+cp node-security/node-security.md   ~/.claude/commands/
+cp unit-test/unit-test.md           ~/.claude/commands/
 
-# Windows (PowerShell)
-Copy-Item commands\*.md "$env:USERPROFILE\.claude\commands\"
+# Windows (PowerShell) — install all
+Copy-Item sprint-planner\sprint-planner.md "$env:USERPROFILE\.claude\commands\"
+Copy-Item node-security\node-security.md   "$env:USERPROFILE\.claude\commands\"
+Copy-Item unit-test\unit-test.md           "$env:USERPROFILE\.claude\commands\"
 ```
 
-**Option B — Symlink (changes in this repo reflect immediately):**
-```bash
-# macOS / Linux
-for f in commands/*.md; do
-  ln -sf "$(pwd)/$f" ~/.claude/commands/"$(basename $f)"
-done
-```
-
-After copying, the commands are available immediately in any Claude Code session as `/sprint-planner`, `/node-security`, and `/unit-test`.
+Commands are available immediately in any Claude Code session after copying. No restart required.
 
 ## Requirements
 
 - [Claude Code](https://claude.ai/code) CLI or desktop app
 
+## Project structure
+
+```
+usefull-skills/
+├── sprint-planner/
+│   ├── sprint-planner.md   ← command file
+│   └── README.md           ← detailed documentation
+├── node-security/
+│   ├── node-security.md
+│   └── README.md
+└── unit-test/
+    ├── unit-test.md
+    └── README.md
+```
+
 ## Contributing
 
-To add a new command, create a `.md` file in the `commands/` directory following this frontmatter structure:
+To add a new command, create a folder with the command name and place two files inside:
+
+```
+my-command/
+├── my-command.md    ← the actual Claude Code command
+└── README.md        ← documentation
+```
+
+The command file must include this frontmatter:
 
 ```markdown
 ---
-description: One-line description of when this command activates
-argument-hint: Description of expected arguments
+description: One-line description of when this command should be used
+argument-hint: Description of the expected argument
 ---
-
-# Command Title
-...
 ```
 
-The `description` field is used by Claude to understand when to suggest the command. The `argument-hint` is shown in the autocomplete UI.
+The `description` field drives Claude's understanding of when to suggest the command. The `argument-hint` is shown in the autocomplete UI when the user types the slash command.
